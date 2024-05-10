@@ -1,44 +1,19 @@
-import numpy as np
-import cv2
+import tensorflow as tf
 import os
-import math
-import shutil
-import glob
-from keras.layers import Conv2D, MaxPool2D, Dropout, Flatten, Dense, BatchNormalization, GlobalAvgPool2D
-from keras.models import Sequential
-from keras.preprocessing.image import load_img, img_to_array
-import keras
+import cv2
 
-def preprocess_data():
-    return
+false_set = "FALSE_Group_for_Microsatellite_instability_pMMR_MSS/tiles"
+true_set = "TRUE_Group_for_Microsatellite_Instability_dMMR_MSI/tiles"
 
-# CNN model
-model = Sequential()
+for image_path in os.listdir(false_set):
+    img = cv2.imread(image_path)
 
-model.add(Conv2D(filters = 16, kernel_size = (3,3), activation = 'relu', input_shape = (224, 224, 3)))
+for image_path in os.listdir(true_set):
+    img = cv2.imread(image_path)
 
-model.add(Conv2D(filters = 36, kernel_size = (3,3), activation = 'relu'))
-model.add(MaxPool2D(pool_size = (2,2), ))
-
-model.add(Conv2D(filters = 64, kernel_size = (3,3), activation = 'relu'))
-model.add(MaxPool2D(pool_size = (2,2), ))
-
-model.add(Conv2D(filters = 128, kernel_size = (3,3), activation = 'relu'))
-model.add(MaxPool2D(pool_size = (2,2), ))
-
-model.add(Dropout(rate = 0.25))
-
-model.add(Flatten())
-model.add(Dense(units = 64, activation = 'relu'))
-model.add(Dropout(rate = 0.25))
-model.add(Dense(units = 1, activation = 'sigmoid'))
+gpus = tf.config.experimental.list_physical_devices('GPU')
+print(len(gpus))
+for gpu in gpus:
+    tf.config.experimental.set_memory_growth(gpu, True)
 
 
-model.compile(optimizer = 'adam', loss = keras.losses.binary_crossentropy, metrics = ['accuracy'])
-print(model.summary())
-
-def main():
-    return
-
-if __name__ == "__main__":
-    main()
