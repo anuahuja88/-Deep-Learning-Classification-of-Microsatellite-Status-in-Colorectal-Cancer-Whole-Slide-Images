@@ -9,6 +9,9 @@ from keras.models import Sequential
 from keras.preprocessing.image import load_img, img_to_array
 import keras
 
+def preprocess_data():
+    return
+
 # CNN model
 model = Sequential()
 
@@ -33,3 +36,9 @@ model.add(Dense(units = 1, activation = 'sigmoid'))
 
 model.compile(optimizer = 'adam', loss = keras.losses.binary_crossentropy, metrics = ['accuracy'])
 print(model.summary())
+
+def main():
+    return
+
+if __name__ == "__main__":
+    main()
