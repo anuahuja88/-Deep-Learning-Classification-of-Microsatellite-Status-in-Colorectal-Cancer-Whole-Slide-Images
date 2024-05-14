@@ -45,19 +45,26 @@ print("Batch shape:", scaled_batch[0].shape)
 print("Labels:", scaled_batch[1])  
 
 
-model = keras.Sequential()
-model.add(layers.Conv2D(16, (3,3), 1, activation= 'relu', input_shape = (256, 256, 3)))
-model.add(layers.MaxPooling2D())
+model = keras.Sequential([
+    layers.Conv2D(16, (3,3), activation='relu', input_shape=(256, 256, 3)),
+    layers.MaxPooling2D(),
+    layers.Conv2D(32, (3,3), activation='relu'),
+    layers.MaxPooling2D(),
+    layers.Conv2D(16, (3,3), activation='relu'),
+    layers.MaxPooling2D(),
+    layers.Flatten(),
+    layers.Dense(256, activation='relu'),
+    layers.Dense(1, activation='sigmoid')
+])
 
-model.add(layers.Conv2D(32, (3,3), 1, activation= 'relu'))
-model.add(layers.MaxPooling2D())
 
-model.add(layers.Conv2D(16, (3,3), 1, activation= 'relu'))
-model.add(layers.MaxPooling2D())
 
-model.add(layers.Flatten())
+model.compile(optimizer='adam', loss=keras.losses.BinaryCrossentropy(), metrics=['accuracy'])
+logdir = '/logs'
+my_callbacks = [
+    keras.callbacks.TensorBoard(log_dir='/logs'),
+]
+tensorboard_callback = keras.callbacks.TensorBoard(logdir = 'logs')
+hist = model.fit(train, epochs=20, validation_data=val, callbacks = my_callbacks)
 
-model.add(layers.Dense(256, activation='relu'))
-model.add(layers.Dense(1 , activation='sigmoid'))
-
-model.compile('adam', loss = keras.losses.BinaryCrossentropy(), metrics = ['accuracy'])
+print(model.summary())
