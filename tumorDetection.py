@@ -3,7 +3,10 @@ import os
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
+from tensorflow.python import keras
+from keras import layers
 
+print(tf.__version__)
 data_set = "Data"
 
 gpus = tf.config.experimental.list_physical_devices('GPU')
@@ -42,3 +45,19 @@ print("Batch shape:", scaled_batch[0].shape)
 print("Labels:", scaled_batch[1])  
 
 
+model = keras.Sequential()
+model.add(layers.Conv2D(16, (3,3), 1, activation= 'relu', input_shape = (256, 256, 3)))
+model.add(layers.MaxPooling2D())
+
+model.add(layers.Conv2D(32, (3,3), 1, activation= 'relu'))
+model.add(layers.MaxPooling2D())
+
+model.add(layers.Conv2D(16, (3,3), 1, activation= 'relu'))
+model.add(layers.MaxPooling2D())
+
+model.add(layers.Flatten())
+
+model.add(layers.Dense(256, activation='relu'))
+model.add(layers.Dense(1 , activation='sigmoid'))
+
+model.compile('adam', loss = keras.losses.BinaryCrossentropy(), metrics = ['accuracy'])
