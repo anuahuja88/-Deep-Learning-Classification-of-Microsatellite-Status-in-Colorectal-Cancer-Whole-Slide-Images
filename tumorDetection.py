@@ -4,7 +4,8 @@ import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 from tensorflow.python import keras
-from keras import layers
+from tensorflow.python.keras import layers, models
+
 
 print(tf.__version__)
 data_set = "Data"
@@ -45,12 +46,12 @@ print("Batch shape:", scaled_batch[0].shape)
 print("Labels:", scaled_batch[1])  
 
 
-model = keras.Sequential([
-    layers.Conv2D(16, (3,3), activation='relu', input_shape=(256, 256, 3)),
+model = models.Sequential([
+    layers.Conv2D(16, (3, 3), activation='relu', input_shape=(256, 256, 3)),
     layers.MaxPooling2D(),
-    layers.Conv2D(32, (3,3), activation='relu'),
+    layers.Conv2D(32, (3, 3), activation='relu'),
     layers.MaxPooling2D(),
-    layers.Conv2D(16, (3,3), activation='relu'),
+    layers.Conv2D(16, (3, 3), activation='relu'),
     layers.MaxPooling2D(),
     layers.Flatten(),
     layers.Dense(256, activation='relu'),
@@ -58,13 +59,21 @@ model = keras.Sequential([
 ])
 
 
+# model = keras.Sequential()
+# model.add(layers.Conv2D(16, (3, 3), activation='relu'))
+# model.add(layers.MaxPooling2D())
+# model.add(layers.Conv2D(32, (3, 3), activation='relu'))
+# model.add(layers.MaxPooling2D())
+# model.add(layers.Conv2D(16, (3, 3), activation='relu'))
+# model.add(layers.MaxPooling2D())
+# model.add(layers.Flatten())
+# model.add(layers.Dense(256, activation='relu'))
+# model.add(layers.Dense(1, activation='sigmoid'))
 
 model.compile(optimizer='adam', loss=keras.losses.BinaryCrossentropy(), metrics=['accuracy'])
-logdir = '/logs'
-my_callbacks = [
-    keras.callbacks.TensorBoard(log_dir='/logs'),
-]
-tensorboard_callback = keras.callbacks.TensorBoard(logdir = 'logs')
-hist = model.fit(train, epochs=20, validation_data=val, callbacks = my_callbacks)
 
 print(model.summary())
+
+logdir = 'logs'
+tensorboard_callback = keras.callbacks.TensorBoard(log_dir=logdir)
+hist = model.fit(train, epochs=20, validation_data=val, callbacks=[tensorboard_callback])
