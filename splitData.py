@@ -2,16 +2,14 @@ import os
 import random
 import shutil
 
-def split_data(input_dir, output_dir, class_dir, train_ratio=0.5, val_ratio=0.25):
+def split_data(input_dir, output_dir, class_dir, train_ratio=0.8):
     # Create train, validation, and test directories if they don't exist
     train_dir = os.path.join(output_dir, 'train')
-    val_dir = os.path.join(output_dir, 'val')
     test_dir = os.path.join(output_dir, 'test')
 
     train_dir = os.path.join(train_dir, class_dir)
-    val_dir = os.path.join(val_dir, class_dir)
     test_dir = os.path.join(test_dir, class_dir)
-    for directory in [train_dir, val_dir, test_dir]:
+    for directory in [train_dir, test_dir]:
         os.makedirs(directory, exist_ok=True)
     
     # Get list of image files in input directory
@@ -23,8 +21,7 @@ def split_data(input_dir, output_dir, class_dir, train_ratio=0.5, val_ratio=0.25
     # Calculate the number of images for each split
     total_images = len(image_files)
     train_count = int(total_images * train_ratio)
-    val_count = int(total_images * val_ratio)
-    test_count = total_images - train_count - val_count
+    test_count = total_images - train_count
     
     # Copy images to train directory
     for image_file in image_files[:train_count]:
@@ -32,14 +29,8 @@ def split_data(input_dir, output_dir, class_dir, train_ratio=0.5, val_ratio=0.25
         dst = os.path.join(train_dir, image_file)
         shutil.copy(src, dst)
     
-    # Copy images to validation directory
-    for image_file in image_files[train_count:train_count+val_count]:
-        src = os.path.join(input_dir, image_file)
-        dst = os.path.join(val_dir, image_file)
-        shutil.copy(src, dst)
-    
     # Copy images to test directory
-    for image_file in image_files[train_count+val_count:]:
+    for image_file in image_files[train_count:]:
         src = os.path.join(input_dir, image_file)
         dst = os.path.join(test_dir, image_file)
         shutil.copy(src, dst)
