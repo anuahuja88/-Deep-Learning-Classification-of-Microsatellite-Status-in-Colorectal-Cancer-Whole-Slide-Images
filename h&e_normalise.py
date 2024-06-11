@@ -91,7 +91,7 @@ def normalise(true, false):
         cv2.waitKey(0)
 
         
-    for tile in os.listdir(true):
+    for tile in os.listdir(false):
         tile = cv2.imread(f"{true}/{tile}")
         rgb = cv2.cvtColor(tile, cv2.COLOR_BGR2RGB)
 
@@ -178,8 +178,8 @@ def normalise(true, false):
 
 
 def main():
-    directory_true = "TRUE_Group_for_Microsatellite_Instability_dMMR_MSI/Tiles"
-    directory_false = "FALSE_Group_for_Microsatellite_Instability_pMMR_MSS/Tiles"
+    directory_true = "Data/TRUE_Group_for_Microsatellite_Instability_dMMR_MSI"
+    directory_false = "Data/FALSE_Group_for_Microsatellite_instability_pMMR_MSS"
     normalise(directory_true, directory_false)
 
 
