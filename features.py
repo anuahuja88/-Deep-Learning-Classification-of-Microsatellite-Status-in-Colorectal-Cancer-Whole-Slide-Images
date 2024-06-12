@@ -267,6 +267,7 @@ def main():
     # extract_colour_histograms(directory_true, directory_false)
     # extract_texture(directory_true, directory_false)
     clahe_features(directory_true, directory_false)
+    local_binary_pattern(directory_true, directory_false)
 
 if __name__ == "__main__":
     main()

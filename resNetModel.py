@@ -18,10 +18,8 @@ train_transforms = transforms.Compose([
     transforms.RandomCrop(224),                        # Randomly crop the image to 224x224
     transforms.RandomHorizontalFlip(),                 # Randomly flip the image horizontally
     transforms.RandomVerticalFlip(),                   # Randomly flip the image vertically
-    transforms.ToTensor(),                             # Convert the image to tensor
-    transforms.Normalize(mean=[0.485, 0.456, 0.406],   # Normalize the image
-                         std=[0.229, 0.224, 0.225]),
-])
+    transforms.ToTensor()                             # Convert the image to tensor
+    ])
 
 # Load datasets
 train_dataset = torchvision.datasets.ImageFolder(root='./Data/train', transform=train_transforms)
