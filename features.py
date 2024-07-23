@@ -179,11 +179,12 @@ def local_binary_pattern(true_dir, false_dir):
             lbp_features.append(hist)
             
             # Display the LBP image
-            plt.figure(figsize=(8, 8))
-            plt.imshow(lbp, cmap='gray')
-            plt.title(f'LBP Image: {filename}')
-            plt.axis('off')
-            plt.show()
+            lbp_display = cv2.normalize(lbp, None, 0, 255, cv2.NORM_MINMAX)
+            lbp_display = cv2.convertScaleAbs(lbp_display)
+
+            # Display the LBP image using OpenCV
+            cv2.imshow(f'LBP Image: {filename}', lbp_display)
+            cv2.waitKey(0) 
 
     # Process 'true' and 'false' directories
     process_directory(true_dir, lbp_features_true)
@@ -225,6 +226,8 @@ def clahe_features(true_dir, false_dir):
             if tile is None:
                 continue
             gray = cv2.cvtColor(tile, cv2.COLOR_BGR2GRAY)
+            cv2.imshow("gray", gray)
+            cv2.waitKey(0)
             clahe = cv2.createCLAHE(clipLimit=5)
             final_img = clahe.apply(gray) + 30
             _, ordinary_img = cv2.threshold(gray, 155, 255, cv2.THRESH_BINARY)
@@ -232,6 +235,8 @@ def clahe_features(true_dir, false_dir):
             # Save the CLAHE processed image
             output_path = os.path.join(output_dir, filename)
             cv2.imwrite(output_path, final_img)
+            cv2.imshow("CLAHE", final_img)
+            cv2.waitKey(0)
 
             # For demonstration, we're storing the histograms of the CLAHE processed images
             hist = cv2.calcHist([final_img], [0], None, [256], [0, 256])
@@ -266,7 +271,7 @@ def main():
     directory_false = "Data/FALSE_Group_for_Microsatellite_instability_pMMR_MSS"
     # extract_colour_histograms(directory_true, directory_false)
     # extract_texture(directory_true, directory_false)
-    clahe_features(directory_true, directory_false)
+    # clahe_features(directory_true, directory_false)
     local_binary_pattern(directory_true, directory_false)
 
 if __name__ == "__main__":

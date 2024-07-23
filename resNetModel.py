@@ -12,14 +12,18 @@ import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.metrics import confusion_matrix
 
+# ===============================================
+# Preprocessing
+# ===============================================
+
 # Define transformations
 train_transforms = transforms.Compose([
     transforms.Resize(256),                            # Resize the image to 256x256
     transforms.RandomCrop(224),                        # Randomly crop the image to 224x224
     transforms.RandomHorizontalFlip(),                 # Randomly flip the image horizontally
     transforms.RandomVerticalFlip(),                   # Randomly flip the image vertically
-    transforms.ToTensor()                             # Convert the image to tensor
-    ])
+    transforms.ToTensor()                              # Convert the image to tensor
+])
 
 # Load datasets
 train_dataset = torchvision.datasets.ImageFolder(root='./Data/train', transform=train_transforms)
@@ -27,33 +31,75 @@ train_dataset = torchvision.datasets.ImageFolder(root='./Data/train', transform=
 batch_size = 32
 train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=4)
 
+# ===============================================
+# Model Creation
+# ===============================================
+
 # Define the model
 class CancerClassifier(pl.LightningModule):
     def __init__(self):
         super(CancerClassifier, self).__init__()
-        self.model = torchvision.models.resnet18()
+        self.model = torchvision.models.resnet18()  # Use a pre-trained ResNet-18 model
         # Modify the final fully connected layer for binary classification
         num_ftrs = self.model.fc.in_features
         self.model.fc = nn.Sequential(
-            nn.Dropout(0.5),
-            nn.Linear(num_ftrs, 1)
+            nn.Dropout(0.5),   # Add dropout for regularization
+            nn.Linear(num_ftrs, 1)  # Output layer with a single neuron for binary classification
         )
 
     def forward(self, x):
         return self.model(x)
 
     def training_step(self, batch, batch_idx):
+        trainer = pl
         images, labels = batch
         outputs = self(images).squeeze()
-        loss = nn.BCEWithLogitsLoss()(outputs, labels.float())
+        loss = nn.BCEWithLogitsLoss()(outputs, labels.float())  # Compute binary cross-entropy loss
         self.log('train_loss', loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
         return loss
 
-
     def configure_optimizers(self):
-        optimizer = torch.optim.Adam(self.parameters(), lr=1e-4, weight_decay=1e-4)
-        scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=7, gamma=0.1)
+        optimizer = torch.optim.Adam(self.parameters(), lr=1e-4, weight_decay=1e-4)  # Adam optimizer
+        scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=7, gamma=0.1)  # Learning rate scheduler
         return [optimizer], [scheduler]
+
+# ===============================================
+# Model Training
+# ===============================================
+
+# Create a checkpoint callback to save the best model
+checkpoint_callback = ModelCheckpoint(
+    monitor='val_loss',  # Monitor validation loss
+    mode='min',          # Save the model with minimum validation loss
+    save_top_k=1,        # Save the top 1 model
+    save_last=True,      # Also save the last model
+)
+
+# Create a logger for TensorBoard
+logger = TensorBoardLogger("tb_logs", name="cancer_classifier")
+
+# Learning rate monitor
+lr_monitor = LearningRateMonitor(logging_interval='epoch')
+
+# Initialize the trainer
+trainer = pl.Trainer(max_epochs=100, accelerator="gpu", devices=1, callbacks=[checkpoint_callback, lr_monitor], logger=logger)
+
+model = CancerClassifier()
+
+# Load or train the model
+if os.path.exists('best_model.pth'):
+    print("Loading model from best_model.pth")
+    model.load_state_dict(torch.load('best_model.pth'))
+else:
+    print("Training the model")
+    # Train the model
+    trainer.fit(model, train_loader)
+    # Save the model
+    torch.save(model.state_dict(), 'best_model.pth')
+
+# ===============================================
+# Model Validation/Analysis
+# ===============================================
 
 def test_model(model, test_data_path):
     # Load test dataset
@@ -79,7 +125,7 @@ def test_model(model, test_data_path):
             outputs = model(images).squeeze()
             loss = criterion(outputs, labels.float())
             test_loss += loss.item()
-            preds = torch.sigmoid(outputs) > 0.5
+            preds = torch.sigmoid(outputs) > 0.5  # Apply sigmoid and threshold at 0.5
             all_preds.extend(preds.cpu().numpy())
             all_labels.extend(labels.cpu().numpy())
             all_images.extend(images.cpu().numpy())
@@ -91,7 +137,6 @@ def test_model(model, test_data_path):
     print(f'Test Accuracy: {test_accuracy:.2f}%')
     
     return all_preds, all_labels, all_images
-
 
 def visualize_predictions(images, preds, labels, num_samples=8, save_to_file=False, file_prefix="prediction"):
     num_batches = len(images) // num_samples
@@ -132,35 +177,6 @@ def imshow(inp, title=None):
         plt.title(title)
     plt.pause(0.001)
 
-# Create a checkpoint callback to save the best model
-checkpoint_callback = ModelCheckpoint(
-    monitor='val_loss',
-    mode='min',
-    save_top_k=1,
-    save_last=True,
-)
-
-# Create a logger for TensorBoard
-logger = TensorBoardLogger("tb_logs", name="cancer_classifier")
-
-# Learning rate monitor
-lr_monitor = LearningRateMonitor(logging_interval='epoch')
-
-# Initialize the trainer
-trainer = pl.Trainer(max_epochs=100, accelerator="gpu", devices=1, callbacks=[checkpoint_callback, lr_monitor], logger=logger)
-
-model = CancerClassifier()
-
-if os.path.exists('best_model.pth'):
-    print("Loading model from best_model.pth")
-    model.load_state_dict(torch.load('best_model.pth'))
-else:
-    print("Training the model")
-    # Train the model
-    trainer.fit(model, train_loader)
-    # Save the model
-    torch.save(model.state_dict(), 'best_model.pth')
-
 # Load the best model
 model.load_state_dict(torch.load('best_model.pth'))
 model = model.to('cuda:0')
@@ -181,4 +197,4 @@ print("Actual Labels:", all_labels_str)
 # Calculate and display confusion matrix
 conf_matrix = confusion_matrix(all_labels, all_preds)
 print("Confusion Matrix: ")
-print(conf_matrix) 
+print(conf_matrix)
