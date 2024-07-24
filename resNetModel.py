@@ -11,6 +11,8 @@ import torchmetrics
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.metrics import confusion_matrix
+from sklearn.metrics import precision_score, recall_score, f1_score
+
 
 # ===============================================
 # Preprocessing
@@ -198,3 +200,11 @@ print("Actual Labels:", all_labels_str)
 conf_matrix = confusion_matrix(all_labels, all_preds)
 print("Confusion Matrix: ")
 print(conf_matrix)
+
+precision = precision_score(all_labels, all_preds)
+recall = recall_score(all_labels, all_preds)
+f1 = f1_score(all_labels, all_preds)
+
+print(f'Precision: {precision:.2f}')
+print(f'Recall: {recall:.2f}')
+print(f'F1-Score: {f1:.2f}')
