@@ -21,7 +21,7 @@ test_transform = T.Compose([
     T.ToTensor()   #Required!
 ]) 
 # Path to the directory containing test images
-test_dir = 'Test set 01'
+test_dir = 'SPLIT_IMAGES'
 
 image_paths = [os.path.join(test_dir, img) for img in os.listdir(test_dir)]
 
